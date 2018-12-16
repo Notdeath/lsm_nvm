@@ -2,7 +2,8 @@
 export NOVELSMSRC=$PWD
 export NOVELSMSCRIPT=$NOVELSMSRC/scripts
 export DBBENCH=$NOVELSMSRC/out-static
-export TEST_TMPDIR=/mnt/pmemdir
+#export TEST_TMPDIR=/mnt/pmemdir
+export TEST_TMPDIR=/pmem/novallsm
 #DRAM buffer size in MB
 export DRAMBUFFSZ=64
 #NVM buffer size in MB
