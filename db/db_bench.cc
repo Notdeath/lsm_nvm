@@ -765,6 +765,9 @@ private:
         WriteBatch batch;
         Status s;
         int64_t bytes = 0;
+        int64_t num_written = 0;
+        double finish_last_ = Env::Default()->NowMicros();;
+        int64_t bytes_last_ = 0;
         for (int i = 0; i < num_; i += entries_per_batch_) {
             batch.Clear();
             for (int j = 0; j < entries_per_batch_; j++) {
@@ -775,12 +778,30 @@ private:
                 batch.Put(key, gen.Generate(value_size_));
                 bytes += value_size_ + strlen(key);
                 thread->stats.FinishedSingleOp();
+                ++num_written;
             }
             s = db_->Write(write_options_, &batch);
             if (!s.ok()) {
                 fprintf(stderr, "put error: %s\n", s.ToString().c_str());
                 exit(1);
             }
+            // test
+
+            if ((num_written) % 250000 == 0) {
+                double now = Env::Default()->NowMicros();
+                double time = now - finish_last_;
+                int64_t ebytes = bytes - bytes_last_;
+                fprintf(stdout, "now= %f  i=%12ld : %11.3f micros/op speed = %.1lf MB/s time = %lf micros\n",
+                        now,
+                        num_written, time / 250000,
+                        ((ebytes / 1048576.8) * 1000000) / time,
+                        time);
+                //PrintStats("rocksdb.stats");
+                fflush(stdout);
+                finish_last_ = now;
+                bytes_last_ = bytes;
+            }
+            //
 
 #if defined(_SIMULATE_FAILURE)
             //We simulate failure by exiting half-way mark
