@@ -19,6 +19,7 @@
 
 #define NUMEMTABLE 0
 #define NUMEMTABLE_NVM 10
+#define TIME_CACULE
 
 
 namespace leveldb {
@@ -276,6 +277,13 @@ private:
 
     // Have we encountered a background error in paranoid mode?
     Status bg_error_;
+
+#ifdef TIME_CACULE
+    uint64_t total_write_time;
+    uint64_t total_flush_time;
+    uint64_t total_compact_time;
+    uint64_t total_write;
+#endif
 
     // Per level compaction stats.  stats_[level] stores the stats for
     // compactions that produced data for the specified "level".

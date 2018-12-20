@@ -214,6 +214,12 @@ DBImpl::DBImpl(const Options& raw_options, const std::string& dbname_disk, const
     versions_ = new VersionSet(dbname_disk_, &options_, table_cache_,
             &internal_comparator_);
     thpool = NULL;
+#ifdef TIME_CACULE
+    total_write_time = 0;
+    total_flush_time = 0;
+    total_compact_time = 0;
+    total_write = 0;
+#endif
 }
 
 DBImpl::~DBImpl() {
@@ -252,6 +258,13 @@ DBImpl::~DBImpl() {
 
     if(thpool && NUM_READ_THREADS)
         thpool_destroy(thpool);
+
+#ifdef TIME_CACULE
+    FILE* fp = fopen("time_recored", "w");
+    fprintf(fp, "total write,total flush, total_comapct\n");
+    fprintf(fp, "%lu,%lu,%lu\n", total_write_time, total_flush_time, total_compact_time);
+    fclose(fp);
+#endif
 }
 
 Status DBImpl::NewDB() {
@@ -878,7 +891,17 @@ void DBImpl::BackgroundCall() {
     } else if (!bg_error_.ok()) {
         // No more background work after a background error.
     } else {
+#ifdef TIME_CACULE
+        uint64_t compaction_start = env_->NowMicros();
+#endif
         BackgroundCompaction();
+#ifdef TIME_CACULE
+        uint64_t compaction_end = env_->NowMicros();
+            total_compact_time += (compaction_end - compaction_start);
+            FILE* fp = fopen("time_compaction", "a");
+            fprintf(fp, "%lu\n", compaction_end - compaction_start);
+            fclose(fp);
+#endif
     }
 
     bg_compaction_scheduled_ = false;
