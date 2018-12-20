@@ -114,8 +114,11 @@ static bool FLAGS_use_existing_db = false;
 static bool FLAGS_reuse_logs = false;
 
 // Use the db with the following name.
-static const char* FLAGS_db_disk = NULL;
-static const char* FLAGS_db_mem = NULL;
+//static const char* FLAGS_db_disk = NULL;
+//static const char* FLAGS_db_mem = NULL;
+static const char* FLAGS_db_disk = "/mnt/ssd";
+static const char* FLAGS_db_mem = "/pmem/novallsm";
+//NoveLSM
 //NoveLSM
 
 namespace leveldb {
@@ -768,6 +771,8 @@ private:
         int64_t num_written = 0;
         double finish_last_ = Env::Default()->NowMicros();;
         int64_t bytes_last_ = 0;
+	int64_t gb_ = 1024 * 1000 * 1000;
+	int64_t per_gb_num_ = gb_ / value_size_;
         for (int i = 0; i < num_; i += entries_per_batch_) {
             batch.Clear();
             for (int j = 0; j < entries_per_batch_; j++) {
@@ -787,13 +792,14 @@ private:
             }
             // test
 
-            if ((num_written) % 250000 == 0) {
+           // if ((num_written) % 2000000 == 0) {
+	   if (((num_written + 1) % per_gb_num_) == 0) {
                 double now = Env::Default()->NowMicros();
                 double time = now - finish_last_;
                 int64_t ebytes = bytes - bytes_last_;
                 fprintf(stdout, "now= %f  i=%12ld : %11.3f micros/op speed = %.1lf MB/s time = %lf micros\n",
                         now,
-                        num_written, time / 250000,
+                        num_written, time / 8000000,
                         ((ebytes / 1048576.8) * 1000000) / time,
                         time);
                 //PrintStats("rocksdb.stats");

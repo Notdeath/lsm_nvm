@@ -521,6 +521,9 @@ public:
             snprintf(buf, sizeof(buf), "/mnt/pmemdir/leveldbtest-%d", int(geteuid()));
             *result = buf;
         }
+        /*char buf[100];
+        snprintf(buf, sizeof(buf), "/mnt/ssd/leveldbtest-%d", int(geteuid()));
+        *result = buf;*/
         // Directory may already exist
         CreateDir(*result);
         return Status::OK();
