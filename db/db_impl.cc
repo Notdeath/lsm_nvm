@@ -1593,7 +1593,6 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* my_batch) {
 #ifdef TIME_CACULE
     uint64_t write_start = env_->NowMicros();
 #endif
-}
     Writer w(&mutex_);
     w.batch = my_batch;
     w.sync = options.sync;
