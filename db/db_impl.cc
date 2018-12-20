@@ -1590,6 +1590,10 @@ Status DBImpl::Delete(const WriteOptions& options, const Slice& key) {
 }
 
 Status DBImpl::Write(const WriteOptions& options, WriteBatch* my_batch) {
+#ifdef TIME_CACULE
+    uint64_t write_start = env_->NowMicros();
+#endif
+}
     Writer w(&mutex_);
     w.batch = my_batch;
     w.sync = options.sync;
@@ -1676,6 +1680,10 @@ Status DBImpl::Write(const WriteOptions& options, WriteBatch* my_batch) {
         writers_.front()->cv.Signal();
     }
     assert(mem_->GetNumKeys());
+#ifdef TIME_CACULE
+uint64_t write_end = env_->NowMicros();
+  total_write_time += (write_end - write_start);
+#endif
     return status;
 }
 
